@@ -1,0 +1,31 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "common.go",
+        "config.go",
+        "drive.go",
+        "login.go",
+        "main.go",
+        "vars.go",
+    ],
+    importpath = "github.com/vivym/igo/cmd/igo",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//:go_default_library",
+        "@com_github_jawher_mow_cli//:go_default_library",
+        "@com_github_mitchellh_go_homedir//:go_default_library",
+        "@com_github_spf13_viper//:go_default_library",
+        "@dev_emperror_emperror//:go_default_library",
+        "@dev_emperror_errors//:go_default_library",
+        "@in_gopkg_yaml_v2//:go_default_library",
+        "@org_golang_x_crypto//ssh/terminal:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "igo",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,11 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "jar.go",
+        "punycode.go",
+    ],
+    importpath = "github.com/vivym/igo/internal/common/cookiejar",
+    visibility = ["//:__subpackages__"],
+)

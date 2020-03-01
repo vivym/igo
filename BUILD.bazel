@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+# gazelle:prefix github.com/vivym/igo
+gazelle(name = "gazelle")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "config.go",
+        "igo.go",
+        "model.go",
+        "push.go",
+        "session.go",
+    ],
+    importpath = "github.com/vivym/igo",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/common/cookiejar:go_default_library",
+        "//internal/service:go_default_library",
+        "@com_github_go_resty_resty_v2//:go_default_library",
+        "@org_golang_x_net//publicsuffix:go_default_library",
+    ],
+)
