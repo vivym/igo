@@ -1,4 +1,6 @@
-package igo
+package session
+
+import "strings"
 
 // AccountInfo holds basic account info
 type AccountInfo struct {
@@ -86,4 +88,10 @@ type AppInfo struct {
 type ResponseError struct {
 	// Error  int    `json:"error"`
 	Reason string `json:"reason,omitempty"`
+}
+
+// GetWebServiceURL returns web service baseURL by name
+func (a *AccountInfo) GetWebServiceURL(name string) string {
+	url := a.Webservices[name].URL
+	return strings.Replace(url, ":443", "", 1)
 }

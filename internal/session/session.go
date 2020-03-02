@@ -1,4 +1,4 @@
-package igo
+package session
 
 import (
 	"encoding/json"
@@ -75,6 +75,9 @@ func NewSession() *Session {
 			ClientBuildNumber:     "2002Hotfix2",
 			ClientMasteringNumber: "2002Hotfix2",
 			DefaultHeaders: map[string]string{
+				"Referer":          "https://www.icloud.com/",
+				"Origin":           "https://www.icloud.com",
+				"Connection":       "keep-alive",
 				"User-Agent":       userAgent,
 				"X-Requested-With": "XMLHttpRequest",
 			},

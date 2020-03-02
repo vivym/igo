@@ -10,20 +10,22 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/vivym/igo/internal/common/cookiejar"
 	"github.com/vivym/igo/internal/service"
+	"github.com/vivym/igo/internal/service/drive"
+	"github.com/vivym/igo/internal/session"
 	"golang.org/x/net/publicsuffix"
 )
 
 // Client provides the iCloud instance
 type Client struct {
 	http      *resty.Client
-	session   *Session
+	session   *session.Session
 	cookieJar *cookiejar.Jar
 	services  map[string]service.Service
 }
 
 // New creates a new iCloud instance
 func New() *Client {
-	session := NewSession()
+	session := session.NewSession()
 	cookieJar, _ := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 	http := resty.New().
 		SetCookieJar(cookieJar).
@@ -35,6 +37,7 @@ func New() *Client {
 		http:      http,
 		session:   session,
 		cookieJar: cookieJar,
+		services:  make(map[string]service.Service),
 	}
 	return &client
 }
@@ -43,7 +46,7 @@ func New() *Client {
 func (c *Client) Close() {
 	// TODO: autoSave (session)
 	for _, service := range c.services {
-		service.Close()
+		service.Stop()
 	}
 }
 
@@ -67,6 +70,7 @@ func (c *Client) LoadSession(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
+	c.http.SetHeaders(c.session.ClientSetting.DefaultHeaders)
 	cookies := c.session.Auth.Cookies
 	if cookies != "" {
 		return c.cookieJar.Loads(cookies)
@@ -135,7 +139,7 @@ func (c *Client) signin() error {
 	}
 
 	res := &struct {
-		ResponseError
+		Reason   string `json:"reason,omitempty"`
 		AuthType string `json:"authType"`
 	}{}
 	if err := json.Unmarshal(rsp.Body(), res); err != nil {
@@ -185,7 +189,7 @@ func (c *Client) accountLogin() error {
 		return err
 	}
 
-	accountInfo := AccountInfo{}
+	accountInfo := session.AccountInfo{}
 	if err := json.Unmarshal(rsp.Body(), &accountInfo); err != nil {
 		return err
 	}
@@ -256,4 +260,14 @@ func (c *Client) trust() error {
 	c.session.Auth.XAppleTwoSVTrustToken = rsp.Header().Get("X-Apple-TwoSV-Trust-Token")
 
 	return nil
+}
+
+// EnableDrive enables iCloud Drive service
+func (c *Client) EnableDrive() *drive.Drive {
+	if _, ok := c.services["drive"]; !ok {
+		service := drive.New(c.http, c.session)
+		c.services["drive"] = service
+	}
+	drive, _ := c.services["drive"].(*drive.Drive)
+	return drive
 }

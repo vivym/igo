@@ -37,7 +37,7 @@ func (c *Client) GetPushToken() error {
 	}
 
 	res := struct {
-		ResponseError
+		Reason           string   `json:"reason,omitempty"`
 		PushTokenTTL     int      `json:"pushTokenTTL"`
 		WebCourierURL    string   `json:"webCourierURL"`
 		RegisteredTopics []string `json:"registeredTopics"`
